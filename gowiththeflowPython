@@ -1,0 +1,49 @@
+class HeatFlow:
+    def __init__(self, initial_temp, num_sections, k_value, sources_list):
+        self.temperatures = [initial_temp] * num_sections
+        self.k = k_value
+        self.sources = sources_list
+
+    def tick(self, time_step):
+        new_temperatures = list(self.temperatures)
+
+        for i in range(len(self.temperatures)):
+            total_change = 0.0
+
+            # Calculate change in temperature due to adjacent sections
+            if i > 0:
+                total_change += self.k * (self.temperatures[i - 1] - self.temperatures[i])
+            if i < len(self.temperatures) - 1:
+                total_change += self.k * (self.temperatures[i + 1] - self.temperatures[i])
+
+            # Calculate change in temperature due to sources or sinks
+            for source_location, source_strength in self.sources:
+                if i == source_location:
+                    total_change += source_strength
+
+            # Update temperature for the next time step
+            new_temperatures[i] += total_change * time_step
+
+        self.temperatures = new_temperatures
+
+    def pretty_print(self):
+        for i, temp in enumerate(self.temperatures):
+            print(f"Section {i + 1}: {temp:.2f}°C")
+
+
+# Example usage
+initial_temp = 20.0
+num_sections = 5
+k_value = 0.1
+sources = [(0, 2.0), (2, -1.0)]  # Example sources at locations 1 and 3
+
+rod = HeatFlow(initial_temp, num_sections, k_value, sources)
+
+print("Initial Temperatures:")
+rod.pretty_print()
+
+# Perform simulation steps
+for i in range(3):
+    rod.tick(1.0)  # Assuming time step of 1 second
+    print(f"\nTemperatures after time step {i + 1}:")
+    rod.pretty_print()
